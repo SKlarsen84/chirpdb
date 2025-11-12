@@ -123,23 +123,35 @@ SELECT [fields] WHERE [conditions]
 
 ```bash
 # Find all documents with age > 35
-curl "http://localhost:8080/query?q=SELECT * WHERE age > 35"
+curl "http://localhost:8080/query?q=SELECT%20*%20WHERE%20age%20%3E%2035"
 
 # Find documents matching multiple conditions
-curl "http://localhost:8080/query?q=SELECT name, age WHERE age > 25 AND city = 'New York'"
+curl "http://localhost:8080/query?q=SELECT%20name%2C%20age%20WHERE%20age%20%3E%2025%20AND%20city%20%3D%20%27New%20York%27"
 
 # Query with parameters
-curl "http://localhost:8080/query?q=SELECT * WHERE age > ?&age=30"
+curl "http://localhost:8080/query?q=SELECT%20*%20WHERE%20age%20%3E%20%3F&age=30"
 
 # Query with named parameters
-curl "http://localhost:8080/query?q=SELECT * WHERE age > :minAge&minAge=30"
+curl "http://localhost:8080/query?q=SELECT%20*%20WHERE%20age%20%3E%20%3AminAge&minAge=30"
 
 # Pattern matching with LIKE
-curl "http://localhost:8080/query?q=SELECT * WHERE name LIKE 'John%'"
+curl "http://localhost:8080/query?q=SELECT%20*%20WHERE%20name%20LIKE%20%27John%25%27"
 
 # Query nested fields
-curl "http://localhost:8080/query?q=SELECT * WHERE user.name = 'John'"
+curl "http://localhost:8080/query?q=SELECT%20*%20WHERE%20user.name%20%3D%20%27John%27"
 ```
+
+**Note**: Query strings must be URL-encoded. Common encodings:
+
+- Space: `%20`
+- `>`: `%3E`
+- `<`: `%3C`
+- `=`: `%3D`
+- `'`: `%27`
+- `%`: `%25`
+- `?`: `%3F`
+- `:`: `%3A`
+- `,`: `%2C`
 
 #### Query Response Format
 
