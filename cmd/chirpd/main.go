@@ -69,7 +69,7 @@ func main() {
 		w.WriteHeader(204)
 	})
 	mux.HandleFunc("POST /admin/merge", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost { http.Error(w, "use POST", 405); return }
+		if r.Method != http.MethodPost { http.Error(w, "use POST", http.StatusMethodNotAllowed); return }
 		if err := db.Merge(); err != nil {
 			http.Error(w, err.Error(), 500); return
 		}
@@ -77,6 +77,33 @@ func main() {
 		w.Write([]byte(`{"merged":true}`))
 	})
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(200) })
+	mux.HandleFunc("GET /query", func(w http.ResponseWriter, r *http.Request) {
+		queryStr := r.URL.Query().Get("q")
+		if queryStr == "" {
+			http.Error(w, "missing query parameter 'q'", 400)
+			return
+		}
+
+		// Extract all query parameters as params (excluding 'q')
+		params := make(map[string]string)
+		for key, values := range r.URL.Query() {
+			if key != "q" && len(values) > 0 {
+				params[key] = values[0]
+			}
+		}
+
+		results, err := db.Query(queryStr, params)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(results); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	})
 
 	srv := &http.Server{ Addr: *addr, Handler: mux }
 

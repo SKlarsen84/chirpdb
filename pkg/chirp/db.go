@@ -3,11 +3,13 @@ package chirp
 import (
 	"bufio"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"hash/crc32"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -268,6 +270,59 @@ func (db *DB) Keys() []string {
 		out = append(out, k)
 	}
 	return out
+}
+
+// QueryResult represents a single query result
+type QueryResult struct {
+	Key   string
+	Value map[string]interface{}
+}
+
+// Query executes a SQL-like query on JSON documents in the database
+func (db *DB) Query(queryStr string, params map[string]string) ([]QueryResult, error) {
+	query, err := ParseQuery(queryStr, params)
+	if err != nil {
+		return nil, err
+	}
+
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+
+	var results []QueryResult
+	f := db.active
+
+	for key, ent := range db.index {
+		h, kb, vb, err := readAt(f, ent.offset)
+		if err != nil {
+			continue // Skip corrupted entries
+		}
+		if h.flags&flagDel != 0 || string(kb) != key {
+			continue // Skip deleted entries
+		}
+
+		// Try to parse as JSON
+		trim := strings.TrimLeftFunc(string(vb), func(r rune) bool { return r <= ' ' })
+		if !strings.HasPrefix(trim, "{") {
+			continue // Skip non-JSON object values (arrays and primitives)
+		}
+
+		var doc map[string]interface{}
+		if err := json.Unmarshal(vb, &doc); err != nil {
+			continue // Skip invalid JSON
+		}
+
+		// Check if document matches query conditions
+		if query.Match(doc) {
+			// Project fields if specified
+			projected := query.Project(doc)
+			results = append(results, QueryResult{
+				Key:   key,
+				Value: projected,
+			})
+		}
+	}
+
+	return results, nil
 }
 
 // ----- internal batching -----

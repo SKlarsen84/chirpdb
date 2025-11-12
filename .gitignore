@@ -3,6 +3,11 @@
 /dist/
 /coverage/
 /*.test
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 **/.DS_Store
 
 # VSCode
