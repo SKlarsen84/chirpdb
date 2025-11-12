@@ -1,0 +1,14 @@
+# Go
+/bin/
+/dist/
+/coverage/
+/*.test
+**/.DS_Store
+
+# VSCode
+.vscode/
+
+# Data files (local only)
+*.db
+*.log
+data/
