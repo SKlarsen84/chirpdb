@@ -1,5 +1,5 @@
-<div align="center">
-  <img src="docs/chirpdb.png" alt="ChirpDB Logo" width="400">
+<div align="center" style="background-color: lightblue; padding: 5px; display: inline-block; border-radius: 236px;">
+  <img src="docs/chirpdb.png" alt="ChirpDB Logo" width="200">
 </div>
 
 # ChirpDB
@@ -30,6 +30,7 @@ ChirpDB uses a Bitcask-like architecture:
 ### Record Format
 
 Each record consists of:
+
 - **Header** (21 bytes): CRC32 (4) | Timestamp (8) | Key Length (4) | Value Length (4) | Flags (1)
 - **Key**: Variable length byte array
 - **Value**: Variable length byte array
@@ -193,7 +194,7 @@ Store a value for a key.
 
 Retrieve a value by key.
 
-- **Response**: 
+- **Response**:
   - `200 OK` with value body
   - `404 Not Found` if key doesn't exist
 - **Content-Type**: Automatically set to `application/json` for JSON values
@@ -309,6 +310,7 @@ db, err := chirp.OpenWithOptions("./data", opts)
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 The MIT License provides:
+
 - ✅ Full open source access - anyone can use, modify, and distribute
 - ✅ No warranty - software provided "as is"
 - ✅ No liability - authors not responsible for damages or issues
@@ -321,4 +323,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Acknowledgments
 
 Inspired by the [Bitcask](https://github.com/basho/bitcask) storage model.
-
